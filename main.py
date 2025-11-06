@@ -1,7 +1,7 @@
-from src.heart_decision_tree import execute_decision_tree
+from src.emprestimos_decision_tree import decision_tree
 
 def main():
-    execute_decision_tree()
+    decision_tree()
     
 if __name__ == "__main__":
     main()
