@@ -1,98 +1,85 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
 from sklearn.model_selection import train_test_split
-from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.impute import SimpleImputer
+from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
 
-def execute_decision_tree():
+def arvore_decisao_emprestimos():
+    # Carregar dataset traduzido
+    df = pd.read_csv("emprestimos.csv")
 
-    df = pd.read_csv("./data/heart_disease_uci.csv")
-
-    feature_cols = [
-        "age", "sex", "cp", 
-        "trestbps", "chol", "fbs", 
-        "restecg", "thalch", "exang", 
-        "oldpeak", "slope", "ca", "thal"
+    # Selecionar colunas relevantes
+    atributos = [
+        "dependentes", "educacao", "autonomo", "renda_anual", "valor_emprestimo",
+        "prazo_emprestimo", "pontuacao_credito", "bens_residenciais",
+        "bens_comerciais", "bens_luxo", "ativos_bancarios"
     ]
+    X = df[atributos]
+    y = df["aprovado"]
 
-    x = df[feature_cols]
-    y = (df["num"] > 0).astype(int)
+    # Identificar variáveis categóricas e numéricas
+    categ = ["educacao", "autonomo"]
+    numericos = [c for c in atributos if c not in categ]
 
-    categorical_fetuares = ["sex", "cp", "fbs", "restecg", "exang", "slope", "ca", "thal"]
-    numeric_features = [c for c in feature_cols if c not in categorical_fetuares]
-
-    numeric_transformer = Pipeline(steps=[
+    # Pré-processamento
+    num_transformer = Pipeline([
         ("imputer", SimpleImputer(strategy="median"))
     ])
-
-    categorical_transformer = Pipeline(steps=[
+    cat_transformer = Pipeline([
         ("imputer", SimpleImputer(strategy="most_frequent")),
         ("onehot", OneHotEncoder(handle_unknown="ignore"))
     ])
 
-    preprocess = ColumnTransformer(
-        transformers=[
-            ("num", numeric_transformer, numeric_features),
-            ("cat", categorical_transformer, categorical_fetuares)
-        ]
-    )
-
-    clf = DecisionTreeClassifier(
-        criterion="gini",
-        max_depth=None,
-        random_state=42
-    )
-
-    pipe = Pipeline(steps=[
-        ("preprocess", preprocess),
-        ("model", clf)
+    preprocessador = ColumnTransformer([
+        ("num", num_transformer, numericos),
+        ("cat", cat_transformer, categ)
     ])
 
-    x_train, x_test, y_train, y_test = train_test_split(
-        x, y, test_size=0.3, random_state=42, stratify=y
+    # Modelo de árvore
+    modelo = DecisionTreeClassifier(criterion="gini", max_depth=4, random_state=42)
+
+    pipeline = Pipeline([
+        ("preprocessador", preprocessador),
+        ("modelo", modelo)
+    ])
+
+    # Divisão treino/teste
+    X_treino, X_teste, y_treino, y_teste = train_test_split(
+        X, y, test_size=0.3, random_state=42, stratify=y
     )
 
-    pipe.fit(x_train, y_train)
+    # Treinamento
+    pipeline.fit(X_treino, y_treino)
+    y_pred = pipeline.predict(X_teste)
 
-    y_pred = pipe.predict(x_test)
-    acc = accuracy_score(y_test, y_pred)
-    cm = confusion_matrix(y_test, y_pred)
-    print(f"Acurácia: {acc:.3f}")
-    print("Matriz de Confusão:\n", cm)
-    print("Relatório de Classificação:\n", classification_report(y_test, y_pred, digits=3))
+    # Avaliação
+    acc = accuracy_score(y_teste, y_pred)
+    cm = confusion_matrix(y_teste, y_pred)
+    print(f"\n📈 Acurácia: {acc:.3f}")
+    print("📊 Matriz de Confusão:\n", cm)
+    print("\n📋 Relatório de Classificação:\n", classification_report(y_teste, y_pred, digits=3))
 
-    X_train_t = pipe.named_steps["preprocess"].transform(x_train)
-
-    num_names = numeric_features
-    cat_encoder = pipe.named_steps["preprocess"].named_transformers_["cat"].named_steps["onehot"]
-    cat_names = cat_encoder.get_feature_names_out(categorical_fetuares)
-    feature_names = list(num_names) + list(cat_names)
-
-    clf_plot = DecisionTreeClassifier(
-        criterion="gini",
-        max_depth=4,
-        random_state=42
-    )
-    clf_plot.fit(X_train_t, y_train)
-
-    importances = clf_plot.feature_importances_
-    imp_series = pd.Series(importances, index=feature_names).sort_values(ascending=False)
-    print("\nTop 10 importâncias de features:")
-    print(imp_series.head(10))
+    # Visualização da árvore
+    X_treino_t = pipeline.named_steps["preprocessador"].transform(X_treino)
+    cat_encoder = pipeline.named_steps["preprocessador"].named_transformers_["cat"].named_steps["onehot"]
+    cat_names = cat_encoder.get_feature_names_out(categ)
+    nomes_final = numericos + list(cat_names)
 
     plt.figure(figsize=(22, 12))
     plot_tree(
-        clf_plot,
-        feature_names=feature_names,
-        class_names=["No Disease (0)", "Disease (1)"],
+        modelo,
+        feature_names=nomes_final,
+        class_names=["Rejeitado", "Aprovado"],
         filled=True, rounded=True, fontsize=9
     )
-    plt.title("Decision Tree - UCI Heart Disease")
-    plt.savefig("heart_decision_tree.png", dpi=200, bbox_inches="tight")
+    plt.title("Árvore de Decisão - Aprovação de Empréstimos", fontsize=16)
+    plt.savefig("arvore_emprestimos.png", dpi=200, bbox_inches="tight")
     plt.show()
+
+# Executar
+arvore_decisao_emprestimos()
