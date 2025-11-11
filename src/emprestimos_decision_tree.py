@@ -60,7 +60,6 @@ def decision_tree():
     matriz = confusion_matrix(y_teste, y_pred)
     print(f"Acurácia: {acuraria:.3f}")
     print("Matriz de Confusão:\n", matriz)
-    print("Relatório de Classificação:\n", classification_report(y_teste, y_pred, digits=3))
 
     # Imagem da árvore
     X_treino_t = pipeline.named_steps["preprocessador"].transform(X_treino)
@@ -70,7 +69,6 @@ def decision_tree():
 
     plt.figure(figsize=(22, 12))
     plot_tree(
-        modelo,
         feature_names=nomes_final,
         class_names=["Rejeitado", "Aprovado"],
         filled=True, rounded=True, fontsize=9
