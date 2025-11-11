@@ -12,6 +12,8 @@ from sklearn.metrics import confusion_matrix, classification_report, accuracy_sc
 def decision_tree():
     df = pd.read_csv("./data/emprestimos.csv")
 
+    print(df)
+    
     # Atribuitos relevantes
     atributos = [
         "dependentes", "educacao", "autonomo", "renda_anual", "valor_emprestimo",
@@ -39,7 +41,7 @@ def decision_tree():
         ("cat", cat_transformer, categ)
     ])
 
-    # Modelo de árvore
+    # Modelo de árvore ( Resultado usando "gini" foi melhor do que entropy )
     modelo = DecisionTreeClassifier(criterion="gini", max_depth=4, random_state=42)
 
     pipeline = Pipeline([
@@ -69,6 +71,7 @@ def decision_tree():
 
     plt.figure(figsize=(22, 12))
     plot_tree(
+        modelo,
         feature_names=nomes_final,
         class_names=["Rejeitado", "Aprovado"],
         filled=True, rounded=True, fontsize=9
