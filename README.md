@@ -2,7 +2,9 @@
 
 https://www.kaggle.com/datasets/architsharma01/loan-approval-prediction-dataset
 
-# docker compose build
+# Docker
 
-# docker compose up 
+docker compose build 
+
+docker compose up
 
