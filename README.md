@@ -8,11 +8,11 @@ https://www.kaggle.com/datasets/architsharma01/loan-approval-prediction-dataset
 
 ```pip install -r requirements.txt```
 
-`py main.py`
+```py main.py```
 
 ## Docker
 
-docker compose build 
+```docker compose build```
 
-docker compose up
+```docker compose up```
 
