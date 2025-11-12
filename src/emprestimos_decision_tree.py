@@ -41,8 +41,8 @@ def decision_tree():
         ("cat", cat_transformer, categ)
     ])
 
-    # Modelo de árvore ( Resultado usando "gini" foi melhor do que entropy )
-    modelo = DecisionTreeClassifier(criterion="gini", max_depth=4, random_state=42)
+    # Modelo de árvore
+    modelo = DecisionTreeClassifier(criterion="entropy", max_depth=4, random_state=42)
 
     pipeline = Pipeline([
         ("preprocessador", preprocessador),
