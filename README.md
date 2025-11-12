@@ -17,6 +17,9 @@ py main.py
 ```
 
 ## Com Docker
+```
+git clone https://github.com/caioxsf/decision-tree.git
+```
 
 ```
 docker compose build
